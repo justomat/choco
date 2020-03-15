@@ -1,17 +1,23 @@
 import subprocess
 import re
+import sys
 
 
-def main():
+def zacc():
     todos = git_grep("TODO")
     for todo in todos.splitlines():
         file, line = todo.split(":")[:2]
         out = git_blame(file, line)
 
-        matches = re.match(
-            r"^(?P<hash>[0-9a-f]{10}) (?P<filepath>.+?) \((?P<author>.+?) (?P<timestamp>.+?) \d+\)(?P<snippet>.+$)",
-            out,
+        test = re.compile(
+            r"^(?P<hash>[0-9a-f]{10})"
+            r" (?P<filepath>.+?)"
+            r" \((?P<author>.+?)"
+            r" (?P<timestamp>.+?) \d+\)"
+            r"(?P<snippet>.+$)"
         )
+
+        matches = re.match(test, out)
 
         if matches:
             print(matches.groupdict())
@@ -34,4 +40,7 @@ def run(command):
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        zacc(".")
+    else:
+        zacc(sys.argv[1])
